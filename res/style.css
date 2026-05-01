@@ -1,0 +1,115 @@
+textview {
+  background-color: transparent;
+  color: #bfbfbf;
+}
+
+textview selection {
+  background-color: transparent;
+  color: inherit;
+}
+
+text {
+  background-color: transparent;
+}
+
+window {
+  background-color: rgba(0, 0, 0, 0.10);
+  font-size: 20px;
+}
+
+vte-terminal {
+    background-color: transparent;
+}
+
+.main-vbox {
+    padding: 10px;
+}
+
+/* Aggressive popover transparency */
+popover.preview-popover,
+popover.preview-popover > contents,
+popover.preview-popover > arrow,
+popover.preview-popover .background {
+  background: none;
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Make sure the arrow is visible but minimal */
+popover.preview-popover > arrow {
+  color: rgba(255, 255, 255, 0.8);
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Drop target highlighting */
+textview:drop(active) {
+  background-color: rgba(100, 200, 255, 0.2);
+  border: 2px dashed rgba(100, 200, 255, 0.5);
+}
+
+/* Drag overlay styling */
+.drag-overlay-content {
+  background-color: rgba(40, 40, 40, 0.95);
+  border: 2px solid rgba(100, 200, 255, 0.8);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: drag-overlay-scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Add a semi-transparent background to the whole overlay */
+.drag-dimmer {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.drag-file-icon {
+  animation: drag-icon-bounce 0.6s ease-in-out infinite alternate;
+}
+
+.drag-file-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.drag-action-label {
+  color: rgba(100, 200, 255, 1.0);
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+@keyframes drag-overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drag-overlay-scale-in {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1.0);
+    opacity: 1;
+  }
+}
+
+@keyframes drag-icon-bounce {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-8px);
+  }
+}

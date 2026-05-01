@@ -1,0 +1,13 @@
+/target
+
+# Editor / OS cruft
+*.swp
+*.swo
+*~
+.DS_Store
+.idea/
+.vscode/
+
+# Local agent context
+CLAUDE.md
+PLAN.md
