@@ -114,10 +114,8 @@ fn main() {
   let tmp_path = std::env::temp_dir()
     .join("moet")
     .join(std::process::id().to_string());
-  if is_session_mode {
-    if !tmp_path.exists() {
-      fs::create_dir_all(&tmp_path).expect("Failed to create temporary directory");
-    }
+  if is_session_mode && !tmp_path.exists() {
+    fs::create_dir_all(&tmp_path).expect("Failed to create temporary directory");
   }
 
   let app = Application::builder()
@@ -295,8 +293,7 @@ fn main() {
     let state1 = state.clone();
     let text_view_menu = text_view.clone();
 
-    let update_menu: Rc<dyn Fn()>;
-    update_menu = Rc::new(move || {
+    let update_menu: Rc<dyn Fn()> = Rc::new(move || {
       let menu_buffer = text_view_menu.buffer();
 
       // Read Dir entries with metadata
@@ -473,11 +470,7 @@ fn main() {
             } else {
               0
             };
-            let pad_len = if len < inner_width {
-              inner_width - len
-            } else {
-              0
-            };
+            let pad_len = inner_width.saturating_sub(len);
 
             // Render in parts to control styling (underline usually) on name only
 
@@ -602,11 +595,13 @@ fn main() {
 
         // Debounce events - discard if last update was less than 50ms ago
         let now = chrono::Local::now();
-        let mut last_update = last_pwd_update.lock().unwrap();
-        if now - *last_update >= chrono::Duration::milliseconds(50) {
-          *last_update = now;
-        } else {
-          continue;
+        {
+          let mut last_update = last_pwd_update.lock().unwrap();
+          if now - *last_update >= chrono::Duration::milliseconds(50) {
+            *last_update = now;
+          } else {
+            continue;
+          }
         }
 
         let event_path = event.paths[0].clone();
@@ -623,6 +618,7 @@ fn main() {
                 let mut file = fs::OpenOptions::new()
                   .write(true)
                   .create(true)
+                  .truncate(true)
                   .open(path_copy)?;
                 file
                   .write_all(location.as_bytes())
@@ -747,12 +743,10 @@ fn main() {
             terminal_key.paste_clipboard();
             return glib::Propagation::Stop;
           }
-          gdk::Key::c => {
-            if terminal_key.has_selection() {
-              terminal_key.copy_clipboard_format(vte4::Format::Text);
-              return glib::Propagation::Stop;
-            }
-            // If no selection, fall through (Proceed) -> Send SIGINT
+          // If no selection, fall through (Proceed) -> Send SIGINT
+          gdk::Key::c if terminal_key.has_selection() => {
+            terminal_key.copy_clipboard_format(vte4::Format::Text);
+            return glib::Propagation::Stop;
           }
           _ => {}
         }
@@ -773,8 +767,8 @@ fn main() {
       // Block Ctrl+q
       if keyval == gdk::Key::q && _state == gdk::ModifierType::CONTROL_MASK {
         return glib::Propagation::Stop;
-      } else if keyval == gdk::Key::equal && _state == gdk::ModifierType::CONTROL_MASK
-        || keyval == gdk::Key::KP_Add && _state == gdk::ModifierType::CONTROL_MASK
+      } else if (keyval == gdk::Key::equal || keyval == gdk::Key::KP_Add)
+        && _state == gdk::ModifierType::CONTROL_MASK
       {
         // Increase font size
         *font_size_px.borrow_mut() += 1;
@@ -787,8 +781,8 @@ fn main() {
           gtk4::STYLE_PROVIDER_PRIORITY_USER,
         );
         return glib::Propagation::Stop;
-      } else if keyval == gdk::Key::minus && _state == gdk::ModifierType::CONTROL_MASK
-        || keyval == gdk::Key::KP_Subtract && _state == gdk::ModifierType::CONTROL_MASK
+      } else if (keyval == gdk::Key::minus || keyval == gdk::Key::KP_Subtract)
+        && _state == gdk::ModifierType::CONTROL_MASK
       {
         // Decrease font size
         *font_size_px.borrow_mut() -= 1;
