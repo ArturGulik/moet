@@ -14,16 +14,20 @@ jobs:
   check:
     name: fmt + clippy + build + test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install GTK4 and VTE
+      - name: Use canonical apt mirror
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libgtk-4-dev \
-            libvte-2.91-gtk4-dev \
-            pkg-config
+          sudo sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g' \
+            /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
+
+      - name: Install GTK4 and VTE
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: libgtk-4-dev libvte-2.91-gtk4-dev pkg-config
+          version: 1.0
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
